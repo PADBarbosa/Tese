@@ -1,6 +1,9 @@
 boost: sudo apt-get install libboost-all-dev
 hwloc: sudo apt-get install -y hwloc
-gperftools: sudo apt-get install google-perftools
+gperftools: 1. sudo apt-get install -y libgoogle-perftools-dev
+			2. sudo apt-get install -y gperf
 
 Dentro da pasta build:
-cmake -DHPX_WITH_CUDA=ON ..
+	1. cmake -DHPX_WITH_CUDA=ON ..
+	2. make install
+
