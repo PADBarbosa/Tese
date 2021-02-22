@@ -1,0 +1,3 @@
+cmake HPX_WITH_CUDA=ON .
+make solution9
+./solution9

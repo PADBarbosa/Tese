@@ -1,0 +1,7 @@
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/install/strip.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/install/local.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/install.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/list_install_components.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/rebuild_cache.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/edit_cache.dir
+/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/solution9.dir
