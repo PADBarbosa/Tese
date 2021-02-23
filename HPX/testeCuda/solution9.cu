@@ -21,7 +21,8 @@ int main()
 
     // target represents the GPU. Different GPUs can be targeted by passing the
     // device id to the constructor.
-    hpx::cuda::experimental::target device;
+    std::vector<hpx::cuda::experimental::target> targets = hpx::cuda::experimental::get_local_targets();
+    hpx::cuda::experimental::target device = targets[0];
 
     allocator_type alloc(device);
     executor_type exec(device);
