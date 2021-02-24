@@ -182,7 +182,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=Exercises
+CMAKE_PROJECT_NAME:STATIC=TestesHPXCUDA
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -427,6 +427,12 @@ TCMALLOC_INCLUDE_DIR:PATH=/usr/include
 //Path to a library.
 TCMALLOC_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so
 
+//Value Computed by CMake
+TestesHPXCUDA_BINARY_DIR:STATIC=/home/pedro/Desktop/Tese/HPX/testeCuda
+
+//Value Computed by CMake
+TestesHPXCUDA_SOURCE_DIR:STATIC=/home/pedro/Desktop/Tese/HPX/testeCuda
+
 //Path to a library.
 pkgcfg_lib_PC_HWLOC_hwloc:FILEPATH=/usr/lib/x86_64-linux-gnu/libhwloc.so
 
@@ -624,7 +630,7 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 CUDA_64_BIT_DEVICE_CODE-ADVANCED:INTERNAL=1
 //List of intermediate files that are part of the cuda dependency
 // scanning.
-CUDA_ADDITIONAL_CLEAN_FILES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/solution9.dir//solution9_generated_solution9.cu.o.depend;/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/exercise9.dir//exercise9_generated_exercise9.cu.o.depend
+CUDA_ADDITIONAL_CLEAN_FILES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/solution9.dir//solution9_generated_solution9.cu.o.depend;/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/exercise9.dir//exercise9_generated_exercise9.cu.o.depend;/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/teste1.dir//teste1_generated_teste1.cu.o.depend;/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/teste2.dir//teste2_generated_teste2.cu.o.depend
 //ADVANCED property for variable: CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
 CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CUDA_BUILD_CUBIN
@@ -912,4 +918,8 @@ solution7_executable_SOURCES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/sol
 solution8_executable_SOURCES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/solution8.cpp
 //Sources for libsolution9_executable.
 solution9_executable_SOURCES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/solution9.cu
+//Sources for libteste1_executable.
+teste1_executable_SOURCES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/teste1.cu
+//Sources for libteste2_executable.
+teste2_executable_SOURCES:INTERNAL=/home/pedro/Desktop/Tese/HPX/testeCuda/teste2.cu
 

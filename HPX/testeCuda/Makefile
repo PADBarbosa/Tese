@@ -68,18 +68,6 @@ install/strip/fast: preinstall/fast
 	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip/fast
 
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
@@ -124,6 +112,18 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles/progress.marks
@@ -157,17 +157,30 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named solution9
+# Target rules for targets named teste2
 
 # Build rule for target.
-solution9: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 solution9
-.PHONY : solution9
+teste2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 teste2
+.PHONY : teste2
 
 # fast build rule for target.
-solution9/fast:
-	$(MAKE) -f CMakeFiles/solution9.dir/build.make CMakeFiles/solution9.dir/build
-.PHONY : solution9/fast
+teste2/fast:
+	$(MAKE) -f CMakeFiles/teste2.dir/build.make CMakeFiles/teste2.dir/build
+.PHONY : teste2/fast
+
+#=============================================================================
+# Target rules for targets named teste1
+
+# Build rule for target.
+teste1: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 teste1
+.PHONY : teste1
+
+# fast build rule for target.
+teste1/fast:
+	$(MAKE) -f CMakeFiles/teste1.dir/build.make CMakeFiles/teste1.dir/build
+.PHONY : teste1/fast
 
 # Help Target
 help:
@@ -176,12 +189,13 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... install/strip"
-	@echo "... install/local"
 	@echo "... install"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... solution9"
+	@echo "... install/local"
+	@echo "... teste2"
+	@echo "... teste1"
 .PHONY : help
 
 

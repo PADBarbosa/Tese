@@ -53,7 +53,8 @@ CMAKE_BINARY_DIR = /home/pedro/Desktop/Tese/HPX/testeCuda
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/solution9.dir/all
+all: CMakeFiles/teste2.dir/all
+all: CMakeFiles/teste1.dir/all
 
 .PHONY : all
 
@@ -63,36 +64,64 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/solution9.dir/clean
+clean: CMakeFiles/teste2.dir/clean
+clean: CMakeFiles/teste1.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/solution9.dir
+# Target rules for target CMakeFiles/teste2.dir
 
 # All Build rule for target.
-CMakeFiles/solution9.dir/all:
-	$(MAKE) -f CMakeFiles/solution9.dir/build.make CMakeFiles/solution9.dir/depend
-	$(MAKE) -f CMakeFiles/solution9.dir/build.make CMakeFiles/solution9.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles --progress-num=1,2,3 "Built target solution9"
-.PHONY : CMakeFiles/solution9.dir/all
+CMakeFiles/teste2.dir/all:
+	$(MAKE) -f CMakeFiles/teste2.dir/build.make CMakeFiles/teste2.dir/depend
+	$(MAKE) -f CMakeFiles/teste2.dir/build.make CMakeFiles/teste2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles --progress-num=4,5,6 "Built target teste2"
+.PHONY : CMakeFiles/teste2.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/solution9.dir/rule: cmake_check_build_system
+CMakeFiles/teste2.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles 3
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/solution9.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/teste2.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles 0
-.PHONY : CMakeFiles/solution9.dir/rule
+.PHONY : CMakeFiles/teste2.dir/rule
 
 # Convenience name for target.
-solution9: CMakeFiles/solution9.dir/rule
+teste2: CMakeFiles/teste2.dir/rule
 
-.PHONY : solution9
+.PHONY : teste2
 
 # clean rule for target.
-CMakeFiles/solution9.dir/clean:
-	$(MAKE) -f CMakeFiles/solution9.dir/build.make CMakeFiles/solution9.dir/clean
-.PHONY : CMakeFiles/solution9.dir/clean
+CMakeFiles/teste2.dir/clean:
+	$(MAKE) -f CMakeFiles/teste2.dir/build.make CMakeFiles/teste2.dir/clean
+.PHONY : CMakeFiles/teste2.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/teste1.dir
+
+# All Build rule for target.
+CMakeFiles/teste1.dir/all:
+	$(MAKE) -f CMakeFiles/teste1.dir/build.make CMakeFiles/teste1.dir/depend
+	$(MAKE) -f CMakeFiles/teste1.dir/build.make CMakeFiles/teste1.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles --progress-num=1,2,3 "Built target teste1"
+.PHONY : CMakeFiles/teste1.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/teste1.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/teste1.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/Desktop/Tese/HPX/testeCuda/CMakeFiles 0
+.PHONY : CMakeFiles/teste1.dir/rule
+
+# Convenience name for target.
+teste1: CMakeFiles/teste1.dir/rule
+
+.PHONY : teste1
+
+# clean rule for target.
+CMakeFiles/teste1.dir/clean:
+	$(MAKE) -f CMakeFiles/teste1.dir/build.make CMakeFiles/teste1.dir/clean
+.PHONY : CMakeFiles/teste1.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
