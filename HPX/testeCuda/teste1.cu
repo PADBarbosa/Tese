@@ -17,7 +17,7 @@ int main()
     using allocator_type = hpx::cuda::experimental::allocator<element_type>;
     using executor_type = hpx::cuda::experimental::default_executor;
 
-    constexpr std::size_t n = 10000000;
+    constexpr std::size_t n = 1000000;
 
     // target represents the GPU. Different GPUs can be targeted by passing the
     // device id to the constructor.
