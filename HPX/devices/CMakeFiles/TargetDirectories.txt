@@ -1,7 +1,0 @@
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/install/strip.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/install/local.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/install.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/list_install_components.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/rebuild_cache.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/edit_cache.dir
-/home/pedro/Desktop/Tese/HPX/devices/CMakeFiles/getDevices.dir
