@@ -12,6 +12,9 @@ int fun1(hpx::cuda::experimental::default_executor exec, hpx::compute::vector<do
     /*for(int i = 0; i < 100000000; i++){
         if(i == 99999999) std::cout << "oi" << std::endl;
     }*/
+
+    hpx::naming::id_type gpu = hpx::find_here();
+    std::cout << "GPU:" << gpu << std::endl;
     
     hpx::ranges::for_each(hpx::execution::par.on(exec), v,
         [] HPX_HOST_DEVICE(double& x) { x *= 2.0; });
@@ -27,6 +30,9 @@ int main()
     using executor_type = hpx::cuda::experimental::default_executor;
 
     constexpr std::size_t n = 10000000;
+
+    hpx::naming::id_type cpu = hpx::find_here();
+    std::cout << "CPU:" << cpu << std::endl;
 
 
     hpx::cuda::experimental::target device;

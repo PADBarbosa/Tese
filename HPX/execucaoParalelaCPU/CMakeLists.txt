@@ -4,16 +4,8 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 cmake_minimum_required(VERSION 3.0)
-project(TestesHPXCUDA CXX)
+project(TestesHPX CXX)
 
 find_package(HPX REQUIRED)
 
-
-if(HPX_WITH_CUDA)
-  add_hpx_executable(teste1 SOURCES teste1.cu)
-  add_hpx_executable(teste2 SOURCES teste2.cu)
-  add_hpx_executable(teste3 SOURCES teste3.cu)
-  add_hpx_executable(teste4 SOURCES teste4.cu)
-endif()
-
-
+add_hpx_executable(teste1 SOURCES teste1.cpp)
