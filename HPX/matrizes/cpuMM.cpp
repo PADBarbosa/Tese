@@ -17,25 +17,24 @@ constexpr std::size_t n = 4;
 
 
 
-int aux(hpx::compute::vector<element_type> &a, hpx::compute::vector<element_type> &b, hpx::compute::vector<element_type> &c, int &i){
+int aux(hpx::compute::vector<element_type> &a, hpx::compute::vector<element_type> &b, int &i){
+    int res = 0;
+    i++;
 
-    //multiplicação
-    //for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-        for (int k = 0; k < n; ++k) {
-            c[(i*n) + j] += a[(i*n) + k] * b[(k*n) + j]; 
-        }
+    for (int k = 0; k < n; k++) {
+        std::cout << "i: " << i << " a: " << a[((i-1)/n) * n + k] << " b: " << b[((i-1)%n) + (k*n)] << std::endl;
+        res += a[((i-1)/n) * n + k] * b[((i-1)%n) + (k*n)];
     }
-    //}
+    std::cout << "---------------" << std::endl;
 
-    return 0;
+    return res;
 }
 
 int main(int argc, char const *argv[])
 {
     hpx::compute::vector<element_type> a(n*n, 0);
     hpx::compute::vector<element_type> b(n*n, 0);
-    hpx::compute::vector<element_type> c(n*n, 1);
+    hpx::compute::vector<element_type> c(n*n, 0);
 
     for(int i = 0; i < n*n; i++){
         a[i] = rand() % 10 + 1;
@@ -59,10 +58,12 @@ int main(int argc, char const *argv[])
     }
 
     
-    for(int i = 0; i < n; i++){
-        hpx::ranges::for_each(hpx::execution::par, c,
-            [&a, &b, &c, &i] () { return aux(a, b, c, i); });
-    }
+    int i = 0;
+    hpx::ranges::for_each(hpx::execution::seq, c,
+        [&a, &b, &i] (int& x) { x = aux(a, b, i); });
+
+    std::cout << "i: " << i << std::endl;
+    
 
     std::cout << "------------Matriz C------------" << std::endl;
     for(int i = 0; i < n; i++){
