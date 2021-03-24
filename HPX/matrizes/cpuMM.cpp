@@ -10,25 +10,23 @@
 #include <cstdlib>
 
 using element_type = int;
-//using allocator_type = hpx::cuda::experimental::allocator<element_type>;
 using executor_type = hpx::cuda::experimental::default_executor;
-constexpr std::size_t n = 4;
+constexpr std::size_t n = 5;
 
 
 
+int aux(hpx::compute::vector<element_type> &a, hpx::compute::vector<element_type> &b, hpx::compute::vector<element_type> &c, std::size_t &current){
+    //std::cout << "Hello from thread " << current << std::endl;
 
-int aux(hpx::compute::vector<element_type> &a, hpx::compute::vector<element_type> &b, int &i){
-    int res = 0;
-    i++;
-
-    for (int k = 0; k < n; k++) {
-        std::cout << "i: " << i << " a: " << a[((i-1)/n) * n + k] << " b: " << b[((i-1)%n) + (k*n)] << std::endl;
-        res += a[((i-1)/n) * n + k] * b[((i-1)%n) + (k*n)];
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            c[(current*n) + i] += a[(current*n) + j] * b[i + (j*n)];
+        }
     }
-    std::cout << "---------------" << std::endl;
 
-    return res;
+    return 0;
 }
+
 
 int main(int argc, char const *argv[])
 {
@@ -57,13 +55,10 @@ int main(int argc, char const *argv[])
         std::cout << std::endl;
     }
 
-    
-    int i = 0;
-    hpx::ranges::for_each(hpx::execution::seq, c,
-        [&a, &b, &i] (int& x) { x = aux(a, b, i); });
 
-    std::cout << "i: " << i << std::endl;
-    
+    hpx::for_loop(hpx::execution::par, 0, n,
+        [&a, &b, &c](std::size_t num_thread) { aux(a, b, c, num_thread); });
+
 
     std::cout << "------------Matriz C------------" << std::endl;
     for(int i = 0; i < n; i++){
