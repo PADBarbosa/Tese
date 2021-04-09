@@ -4,6 +4,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 cmake_minimum_required(VERSION 3.0)
+set(HPX_CXX_COMPILER g++-8)
 project(TestesHPX CXX)
 
 find_package(HPX REQUIRED)

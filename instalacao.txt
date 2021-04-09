@@ -7,3 +7,13 @@ Dentro da pasta build:
 	1. cmake -DHPX_WITH_CUDA=ON ..
 	2. sudo make install
 
+-DHPX_WITH_PARCELPORT_MPI=ON (ligar mpi)
+
+-DCMAKE_CXX_COMPILER=/usr/bin/gcc-8 (especificar versão do gcc a usar)
+export CC=/usr/bin/gcc-8
+export CXX=/usr/bin/g++-8
+
+
+HPXCL: 
+	1. cmake -DHPX_ROOT=/usr/local/lib/hpx -DHPXCL_WITH_CUDA=ON -DCUDA_TOOLKIT_ROOT_DIR=/usr/lib/cuda ..
+	2. sudo make install

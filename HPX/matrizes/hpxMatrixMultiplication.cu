@@ -15,28 +15,14 @@ using executor_type = hpx::cuda::experimental::default_executor;
 constexpr std::size_t n = 4;
 
 
-int fun1(hpx::compute::vector<int, allocator_type> &a, hpx::compute::vector<int, allocator_type> &b, hpx::compute::vector<int, allocator_type> &c, int value, hpx::compute::vector<int, allocator_type> &vetor)
-{
-    int row;
-    int column;
+int aux(hpx::compute::vector<int, allocator_type> &a, hpx::compute::vector<int, allocator_type> &b, hpx::compute::vector<int, allocator_type> &c, std::size_t &current){
+    //std::cout << "Hello from thread " << current << std::endl;
 
-
-    row = value/n; //arredondar para cima
-
-    if((column % n) == 0){
-        column = n;
-    }
-    else{
-        column %= n;
-    }
-
-
-    //multiplicar linha por coluna e somar o valor à celula certa
     for(int i = 0; i < n; i++){
-        c[ ((row - 1) * n + column) - 1] += a[((row - 1) * n) + i] * b[(i * n) + (column - 1)];
+        for(int j = 0; j < n; j++){
+            c[(current*n) + i] += a[(current*n) + j] * b[i + (j*n)];
+        }
     }
-
-
 
     return 0;
 }
@@ -69,11 +55,9 @@ int main(int argc, char const *argv[])
     allocator_type alloc(device);
     executor_type exec(device);
 
-    hpx::compute::vector<element_type, allocator_type> a_device(n, alloc);
-    hpx::compute::vector<element_type, allocator_type> b_device(n, alloc);
-    hpx::compute::vector<element_type, allocator_type> c_device(n, 0, alloc); //vai guardar os resultados da multiplicação da matriz A por B
-    hpx::compute::vector<element_type, allocator_type> vetor(n, 0, alloc);
-
+    hpx::compute::vector<element_type, allocator_type> a_device(n*n, alloc);
+    hpx::compute::vector<element_type, allocator_type> b_device(n*n, alloc);
+    hpx::compute::vector<element_type, allocator_type> c_device(n*n, 0, alloc); //vai guardar os resultados da multiplicação da matriz A por B
 
 
     //Copiar as matrizes para o GPU
@@ -81,20 +65,9 @@ int main(int argc, char const *argv[])
     hpx::ranges::copy(hpx::execution::par, a_host.begin(), a_host.end(), a_device.begin());
     hpx::ranges::copy(hpx::execution::par, b_host.begin(), b_host.end(), a_device.begin());
 
-    
-    hpx::compute::vector<hpx::future<int>> futuros(n*n);
 
-    int value = 0;
-
-    for(int i = 0; i < n; i++){
-        value = i;
-        futuros[i] = hpx::async([&exec, &a_device, &b_device, &c_device, &value, &vetor]() { return fun1<<<1,1>>>(a_device, b_device, c_device, value, vetor); });
-    }
-
-
-    /*hpx::when_all(futuros[0], futuros[1], futuros[2], futuros[3], futuros[4], futuros[5], futuros[6], futuros[7], futuros[8], futuros[9], futuros[10], futuros[11], futuros[12], futuros[13], futuros[14], futuros[15]).then([](hpx::shared_future<void>) {
-        std::cout << "Terminou" << std::endl;
-    });*/
+    hpx::for_loop(hpx::execution::par.on(exec), 0, n,
+        [&a_device, &b_device, &c_device] HPX_HOST_DEVICE(std::size_t num_thread) { aux(a_device, b_device, c_device, num_thread); });
 
 
     //Copiar a matriz do GPU para CPU
