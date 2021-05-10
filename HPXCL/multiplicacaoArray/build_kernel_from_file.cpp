@@ -1,8 +1,3 @@
-// Copyright (c)       2015 Patrick Diehl
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
 #include <hpx/hpx_main.hpp>
 #include <hpx/iostream.hpp>
 #include <hpx/future.hpp>
@@ -13,15 +8,7 @@
 
 using namespace hpx::cuda;
 
-//#define SIZE 130
 #define SIZE 8
-#define STEPS 50000
-#define BLOCK_SIZE 2
-//#define BLOCK_SIZE 16
-
-
-
-
 
 int main(int argc, char* argv[]) {
 
@@ -53,7 +40,7 @@ int main(int argc, char* argv[]) {
 	data_futures.push_back(inbuffer.enqueue_write(0, sizeof(int) * SIZE, input));
 
 	program prog = cudaDevice.create_program_with_file("example_kernel.cu").get();
-	//program prog2 = cudaDevice.create_program_with_file("example_kernel.cu").get();
+	//program prog_2 = cudaDevice.create_program_with_file("example_kernel.cu").get();
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +54,7 @@ int main(int argc, char* argv[]) {
 	// Compile the program
 	prog.build_sync(flags, "multiply");
 	prog.build_sync(flags, "multiply2");
-	//prog2.build_sync(flags, "multiply2");
+	//prog_2.build_sync(flags, "multiply2");
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     int* output;
@@ -127,28 +114,54 @@ int main(int argc, char* argv[]) {
 	std::cout << std::endl;
 
 
-	buffer outoutbuffer = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
-	data_futures.push_back(outoutbuffer.enqueue_write(0, sizeof(int) * SIZE, output));
+	std::vector<hpx::lcos::future<void>> data_futures_2;
 
-	std::vector<hpx::cuda::buffer> argss;
-	argss.push_back(inbuffer);
-	argss.push_back(outoutbuffer);
-	argss.push_back(sizebuffer);
+	int* input_2;
+	cudaMallocHost((void**)&input_2, sizeof(int) * SIZE);
+	checkCudaError("Malloc inputData");
+
+	for(int i = 0; i < SIZE; i++){
+		input_2[i] = 1;
+	}
+
+	buffer inbuffer_2 = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+
+	data_futures_2.push_back(inbuffer_2.enqueue_write(0, sizeof(int) * SIZE, input_2));
 
 
 
-	auto kernel_future_2 = prog.run(argss, "multiply2", grid, block);
-	//auto kernel_future_2 = prog2.run(argss, "multiply2", grid, block);
+	int* output_2;
+	cudaMallocHost((void**)&output_2, sizeof(int) * SIZE);
+	checkCudaError("Malloc result");
+	
+	
+	buffer outbuffer_2 = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	data_futures_2.push_back(outbuffer_2.enqueue_write(0, sizeof(int) * SIZE, output_2));
+
+
+
+	std::vector<hpx::cuda::buffer> args_2;
+	args_2.push_back(inbuffer_2);
+	args_2.push_back(outbuffer_2);
+	args_2.push_back(sizebuffer);
+
+
+	hpx::wait_all(data_futures_2);
+
+	auto kernel_future_2 = prog.run(args_2, "multiply2", grid, block);
+	//auto kernel_future_2 = prog2.run(args_2, "multiply2", grid, block);
 
 	hpx::wait_all(kernel_future_2);
 
 	//Copy the result back
-	int* ress = outoutbuffer.enqueue_read_sync<int>(0, sizeof(int) * SIZE);
+	int* res_2 = outbuffer_2.enqueue_read_sync<int>(0, sizeof(int) * SIZE);
 
 	for (int i = 0; i < SIZE; i++){
-		std::cout << ress[i] << ", ";
+		std::cout << res_2[i] << ", ";
 	}
 	std::cout << std::endl;
+
+
 
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
