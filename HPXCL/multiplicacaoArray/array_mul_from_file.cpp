@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
 
 	data_futures.push_back(inbuffer.enqueue_write(0, sizeof(int) * SIZE, input));
 
-	program prog = cudaDevice.create_program_with_file("example_kernel.cu").get();
-	//program prog_2 = cudaDevice.create_program_with_file("example_kernel.cu").get();
+	program prog = cudaDevice.create_program_with_file("array_mul_kernel.cu").get();
+	//program prog_2 = cudaDevice.create_program_with_file("array_mul_kernel.cu").get();
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

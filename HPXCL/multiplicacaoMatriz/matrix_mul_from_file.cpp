@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 	data_futures.push_back(mAbuffer.enqueue_write(0, sizeof(int) * SIZE * SIZE, matrizA));
 	data_futures.push_back(mBbuffer.enqueue_write(0, sizeof(int) * SIZE * SIZE, matrizB));
 
-	program prog = cudaDevice.create_program_with_file("example_kernel.cu").get();
+	program prog = cudaDevice.create_program_with_file("matrix_mul_kernel.cu").get();
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
