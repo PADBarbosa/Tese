@@ -33,27 +33,30 @@ int main(int argc, char* argv[]) {
 		input[i] = 1;
 	}
 
-	device cudaDevice = devices[0];
+	device cudaDevice1 = devices[0];
+	device cudaDevice2 = devices[1];
 
-	buffer inbuffer = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	buffer inbuffer = cudaDevice1.create_buffer(sizeof(int) * SIZE).get();
 
 	data_futures.push_back(inbuffer.enqueue_write(0, sizeof(int) * SIZE, input));
 
-	program prog = cudaDevice.create_program_with_file("array_mul_kernel.cu").get();
-	//program prog_2 = cudaDevice.create_program_with_file("array_mul_kernel.cu").get();
+	program prog = cudaDevice1.create_program_with_file("array_mul_kernel.cu").get();
+	program prog_2 = cudaDevice2.create_program_with_file("array_mul_kernel.cu").get();
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
-	mode.append(std::to_string(cudaDevice.get_device_architecture_major().get()));
-	mode.append(std::to_string(cudaDevice.get_device_architecture_minor().get()));
+	mode.append(std::to_string(cudaDevice1.get_device_architecture_major().get()));
+	mode.append(std::to_string(cudaDevice1.get_device_architecture_minor().get()));
+	mode.append(std::to_string(cudaDevice2.get_device_architecture_major().get()));
+	mode.append(std::to_string(cudaDevice2.get_device_architecture_minor().get()));
 	flags.push_back(mode);
 
 	// Compile the program
 	prog.build_sync(flags, "multiply");
-	prog.build_sync(flags, "multiply2");
+	prog_2.build_sync(flags, "multiply2");
 	//prog_2.build_sync(flags, "multiply2");
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,7 +65,7 @@ int main(int argc, char* argv[]) {
 	checkCudaError("Malloc result");
 	
 	
-	buffer outbuffer = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	buffer outbuffer = cudaDevice1.create_buffer(sizeof(int) * SIZE).get();
 	data_futures.push_back(outbuffer.enqueue_write(0, sizeof(int) * SIZE, output));
 
 
@@ -86,7 +89,7 @@ int main(int argc, char* argv[]) {
 	cudaMallocHost((void**)&n, sizeof(int));
 	n[0] = SIZE;
 
-	buffer sizebuffer = cudaDevice.create_buffer(sizeof(int)).get();
+	buffer sizebuffer = cudaDevice1.create_buffer(sizeof(int)).get();
 	data_futures.push_back(sizebuffer.enqueue_write(0, sizeof(int), n));
 
 
@@ -114,6 +117,8 @@ int main(int argc, char* argv[]) {
 	std::cout << std::endl;
 
 
+
+
 	std::vector<hpx::lcos::future<void>> data_futures_2;
 
 	int* input_2;
@@ -124,7 +129,7 @@ int main(int argc, char* argv[]) {
 		input_2[i] = 1;
 	}
 
-	buffer inbuffer_2 = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	buffer inbuffer_2 = cudaDevice2.create_buffer(sizeof(int) * SIZE).get();
 
 	data_futures_2.push_back(inbuffer_2.enqueue_write(0, sizeof(int) * SIZE, input_2));
 
@@ -135,20 +140,23 @@ int main(int argc, char* argv[]) {
 	checkCudaError("Malloc result");
 	
 	
-	buffer outbuffer_2 = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	buffer outbuffer_2 = cudaDevice2.create_buffer(sizeof(int) * SIZE).get();
 	data_futures_2.push_back(outbuffer_2.enqueue_write(0, sizeof(int) * SIZE, output_2));
 
+
+	buffer sizebuffer2 = cudaDevice2.create_buffer(sizeof(int)).get();
+	data_futures_2.push_back(sizebuffer2.enqueue_write(0, sizeof(int), n));
 
 
 	std::vector<hpx::cuda::buffer> args_2;
 	args_2.push_back(inbuffer_2);
 	args_2.push_back(outbuffer_2);
-	args_2.push_back(sizebuffer);
+	args_2.push_back(sizebuffer2);
 
 
 	hpx::wait_all(data_futures_2);
 
-	auto kernel_future_2 = prog.run(args_2, "multiply2", grid, block);
+	auto kernel_future_2 = prog_2.run(args_2, "multiply2", grid, block);
 	//auto kernel_future_2 = prog2.run(args_2, "multiply2", grid, block);
 
 	hpx::wait_all(kernel_future_2);
