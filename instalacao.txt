@@ -15,5 +15,5 @@ export CXX=/usr/bin/g++-8
 
 
 HPXCL: 
-	1. cmake -DHPX_ROOT=/usr/local/lib/hpx -DHPXCL_WITH_CUDA=ON -DCUDA_TOOLKIT_ROOT_DIR=/usr/lib/cuda ..
+	1. sudo cmake -DHPX_ROOT=/usr/local/lib/hpx -DHPXCL_WITH_CUDA=ON -DCUDA_TOOLKIT_ROOT_DIR=/usr/lib/cuda ..
 	2. sudo make install

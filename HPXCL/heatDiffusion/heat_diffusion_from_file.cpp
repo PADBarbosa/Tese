@@ -99,16 +99,26 @@ int main (int argc, char* argv[]) {
 	// Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
+	hpx::cuda::server::program::Dim3 grid_2;
+	hpx::cuda::server::program::Dim3 block_2;
 
 	// Set the values for the grid dimension
 	grid.x = 8;
 	grid.y = 8;
 	grid.z = 1;
 
+	grid_2.x = 1;
+	grid_2.y = 1;
+	grid_2.z = 1;
+
 	// Set the values for the block dimension
 	block.x = BLOCK_SIZE;
 	block.y = BLOCK_SIZE;
 	block.z = 1;
+
+	block_2.x = 1;
+	block_2.y = 1;
+	block_2.z = 1;
 
 
 
@@ -149,8 +159,12 @@ int main (int argc, char* argv[]) {
 	args.push_back(m_buffer);
 	args.push_back(r_buffer);
 
+	std::vector<hpx::cuda::buffer> args_2;
+
 	hpx::wait_all(data_futures);	
 
+	/* Version to use with the loop on the cpp file
+	*/
 	float* res;
 	cudaMallocHost((void**)&res, sizeof(float) * SIZE * SIZE * SIZE);
 
@@ -159,6 +173,8 @@ int main (int argc, char* argv[]) {
 		auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)));
 
 		wait_all(kernel_future);
+	
+		res = inbuffer.enqueue_read_sync<float>(0, sizeof(float) * SIZE * SIZE * SIZE);
 
 		float* temp = 0;
 		temp = input;
@@ -171,9 +187,35 @@ int main (int argc, char* argv[]) {
 		wait_all(data);
 	}
 
-	//hpx::wait_all(kernel_future);
+	/* Version to use when the loop in on the kernel
+	auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)));
 
-	dump(input, SIZE, SIZE/3);
+	wait_all(kernel_future);
+	*/
+
+	/* Version to use a kernel swap NÃO ESTÁ FUNCIONAL
+	for (int i = 0; i < 10; i++)	{
+		auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)) + sizeof(int) * 2);
+
+		wait_all(kernel_future);
+
+
+		auto kernel_future_2 = prog.run(args_2, "swap", grid_2, block_2, sizeof(int) * 2);
+
+		wait_all(kernel_future_2);
+
+	}
+	*/
+
+
+
+
+	
+	float* res;
+	cudaMallocHost((void**)&res, sizeof(float) * SIZE * SIZE * SIZE);
+	res = inbuffer.enqueue_read_sync<float>(0, sizeof(float) * SIZE * SIZE * SIZE);
+
+	dump(res, SIZE, SIZE/3);
 
 	return EXIT_SUCCESS;
 }
