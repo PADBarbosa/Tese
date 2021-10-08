@@ -27,6 +27,8 @@ extern "C" {
 		float up_z;
 		float down_z;
 
+
+		// Poderá ser necessário fazer alterações uma vez que o valor do m foi alterado para SIZE/2
 		for(int l = 0; l < n-2; ++l) {
 			if(thx < m - 1 && thy < n -1) {
 
@@ -65,6 +67,14 @@ extern "C" {
 
 				__syncthreads(); 
 			}
+
+			// Copiar a penultima coluna para a posição da coluna que deveria ser comunicada pelo segundo GPU
+			for(int i = 0; i < n; i++){
+				for(int j = 0; j < n; j++){
+					output[((n/2)+1) + j*((n/2)+1) + i*n*((n/2)+1)] = output[(n/2) + j*((n/2)+1) + i*n*((n/2)+1)];
+				}
+			}
+
 		}
 	}
 }

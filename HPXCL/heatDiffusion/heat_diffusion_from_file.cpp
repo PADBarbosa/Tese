@@ -74,17 +74,15 @@ int main (int argc, char* argv[]) {
 	buffer inbuffer = cudaDevice.create_buffer(sizeof(float) * SIZE * SIZE * SIZE).get();
 	data_futures.push_back(inbuffer.enqueue_write(0, sizeof(float) * SIZE * SIZE * SIZE, input));
 
-	program prog = cudaDevice.create_program_with_file("heat_diffusion_kernel.cu").get();
+	program prog_1 = cudaDevice.create_program_with_file("heat_diffusion_kernel.cu").get();
 
-	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(std::to_string(cudaDevice.get_device_architecture_major().get()));
 	mode.append(std::to_string(cudaDevice.get_device_architecture_minor().get()));
 	flags.push_back(mode);
 
-	// Compile the program
-	prog.build_sync(flags, "fdm3d");
+	prog_1.build_sync(flags, "fdm3d");
 
 	float* output;
 	cudaMallocHost((void**)&output, sizeof(float) * SIZE * SIZE * SIZE);
@@ -96,29 +94,17 @@ int main (int argc, char* argv[]) {
 	data_futures.push_back(outbuffer.enqueue_write(0, sizeof(float) * SIZE * SIZE * SIZE, output));
 
 
-	// Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
-	hpx::cuda::server::program::Dim3 grid_2;
-	hpx::cuda::server::program::Dim3 block_2;
 
-	// Set the values for the grid dimension
 	grid.x = 8;
 	grid.y = 8;
 	grid.z = 1;
 
-	grid_2.x = 1;
-	grid_2.y = 1;
-	grid_2.z = 1;
-
-	// Set the values for the block dimension
 	block.x = BLOCK_SIZE;
 	block.y = BLOCK_SIZE;
 	block.z = 1;
 
-	block_2.x = 1;
-	block_2.y = 1;
-	block_2.z = 1;
 
 
 
@@ -151,7 +137,6 @@ int main (int argc, char* argv[]) {
 	data_futures.push_back(r_buffer.enqueue_write(0, sizeof(float), r));
 
 
-	// Set the parameter for the kernel, have to be the same order as in the definition
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(inbuffer);
 	args.push_back(outbuffer);
@@ -159,63 +144,27 @@ int main (int argc, char* argv[]) {
 	args.push_back(m_buffer);
 	args.push_back(r_buffer);
 
-	std::vector<hpx::cuda::buffer> args_2;
+	hpx::wait_all(data_futures);
 
-	hpx::wait_all(data_futures);	
 
-	/* Version to use with the loop on the cpp file
-	*/
-	float* res;
-	cudaMallocHost((void**)&res, sizeof(float) * SIZE * SIZE * SIZE);
-
-	for (int i = 0; i < 10; i++)	{
-		std::vector<hpx::lcos::future<void>> data;
+	for (int i = 0; i < STEPS; i++)	{
 		auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)));
 
 		wait_all(kernel_future);
 	
-		res = inbuffer.enqueue_read_sync<float>(0, sizeof(float) * SIZE * SIZE * SIZE);
-
-		float* temp = 0;
-		temp = input;
-		res = outbuffer.enqueue_read_sync<float>(0, sizeof(float) * SIZE * SIZE * SIZE);
-		input = res;
-		output = temp;
-
-		data.push_back(inbuffer.enqueue_write(0, sizeof(float) * SIZE * SIZE * SIZE, input));
-		data.push_back(outbuffer.enqueue_write(0, sizeof(float) * SIZE * SIZE * SIZE, output));
-		wait_all(data);
+		std::iter_swap(args.begin(), args.begin()+1);
 	}
 
-	/* Version to use when the loop in on the kernel
-	auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)));
 
-	wait_all(kernel_future);
-	*/
-
-	/* Version to use a kernel swap NÃO ESTÁ FUNCIONAL
-	for (int i = 0; i < 10; i++)	{
-		auto kernel_future = prog.run(args, "fdm3d", grid, block, 3 * (sizeof(float) * (BLOCK_SIZE+2) * (BLOCK_SIZE+2)) + sizeof(int) * 2);
-
-		wait_all(kernel_future);
-
-
-		auto kernel_future_2 = prog.run(args_2, "swap", grid_2, block_2, sizeof(int) * 2);
-
-		wait_all(kernel_future_2);
-
-	}
-	*/
-
-
-
-
-	
 	float* res;
 	cudaMallocHost((void**)&res, sizeof(float) * SIZE * SIZE * SIZE);
 	res = inbuffer.enqueue_read_sync<float>(0, sizeof(float) * SIZE * SIZE * SIZE);
 
 	dump(res, SIZE, SIZE/3);
+
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
 	return EXIT_SUCCESS;
 }
