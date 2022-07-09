@@ -8,30 +8,6 @@
 
 using namespace hpx::cuda;
 
-/*
----------Valores para o device: 0---------
-NumBlocks: 272
-BlockSize: 256
-SharedMemSize: 4096
-DeltaTime: 0.016
-Damping: 1
-NumTiles: 392
-DeviceOffset: 0
-Device NumBodies: 69632
-Total NumBodies: 100352
-
----------Valores para o device: 1---------
-NumBlocks: 120
-BlockSize: 256
-SharedMemSize: 4096
-DeltaTime: 0.016
-Damping: 1
-NumTiles: 392
-DeviceOffset: 69632
-Device NumBodies: 30720
-Total NumBodies: 100352
-
-*/
 
 int main (int argc, char* argv[]) {
 	std::cout << "Start" << std::endl;
@@ -47,7 +23,7 @@ int main (int argc, char* argv[]) {
 	}
 
 	device cudaDevice_1 = devices[0];
-	device cudaDevice_2 = devices[0];
+	device cudaDevice_2 = devices[1];
 
 	float* hPos_new;
 	cudaMallocHost((void**)&hPos_new, sizeof(float) * 4 * 100352);
@@ -79,39 +55,6 @@ int main (int argc, char* argv[]) {
 		hVel[i*4+3] = 4*(i+1);
 	}
 
-	/*for(int i = 0; i < 69632; i++){
-		hPos_new[i*4] = 1;
-		hPos_new[i*4+1] = 2;
-		hPos_new[i*4+2] = 3;
-		hPos_new[i*4+3] = 4;
-
-		hPos_old[i*4] = 1;
-		hPos_old[i*4+1] = 2;
-		hPos_old[i*4+2] = 3;
-		hPos_old[i*4+3] = 4;
-
-		hVel[i*4] = 1;
-		hVel[i*4+1] = 2;
-		hVel[i*4+2] = 3;
-		hVel[i*4+3] = 4;
-	}
-
-	for(int i = 69632; i < 100352; i++){
-		hPos_new[i*4] = 1;
-		hPos_new[i*4+1] = 2;
-		hPos_new[i*4+2] = 3;
-		hPos_new[i*4+3] = 4;
-
-		hPos_old[i*4] = 1;
-		hPos_old[i*4+1] = 2;
-		hPos_old[i*4+2] = 3;
-		hPos_old[i*4+3] = 4;
-
-		hVel[i*4] = 1;
-		hVel[i*4+1] = 2;
-		hVel[i*4+2] = 3;
-		hVel[i*4+3] = 4;
-	}*/
 
 	buffer dPos_new_buffer_1 = cudaDevice_1.create_buffer(sizeof(float) * 4 * 100352).get();
 	data_futures.push_back(dPos_new_buffer_1.enqueue_write(0, sizeof(float) * 4 * 100352, hPos_new));
@@ -133,54 +76,101 @@ int main (int argc, char* argv[]) {
 	buffer dVel_buffer_2 = cudaDevice_2.create_buffer(sizeof(float) * 4 * 100352).get();
 	data_futures.push_back(dVel_buffer_2.enqueue_write(0, sizeof(float) * 4 * 100352, hVel));
 
-/*
-	int* deviceOffset;
-	cudaMallocHost((void**)&deviceOffset, sizeof(int));
-	checkCudaError("Malloc deviceOffset");
-	deviceOffset[0] = 0;
 
-	buffer dOffset_buffer = cudaDevice.create_buffer(sizeof(int)).get();
-	data_futures.push_back(dOffset_buffer.enqueue_write(0, sizeof(int), deviceOffset));
+	int* deviceOffset_1;
+	cudaMallocHost((void**)&deviceOffset_1, sizeof(int));
+	checkCudaError("Malloc deviceOffset_1");
+	deviceOffset_1[0] = 0;
 
-
-	int* deviceNumBodies;
-	cudaMallocHost((void**)&deviceNumBodies, sizeof(int));
-	checkCudaError("Malloc deviceNumBodies");
-	deviceNumBodies[0] = 69632;
-
-	buffer dNumBodies_buffer = cudaDevice.create_buffer(sizeof(int)).get();
-	data_futures.push_back(dNumBodies_buffer.enqueue_write(0, sizeof(int), deviceNumBodies));
+	buffer dOffset_buffer_1 = cudaDevice_1.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dOffset_buffer_1.enqueue_write(0, sizeof(int), deviceOffset_1));
 
 
-	float* deltaTime;
-	cudaMallocHost((void**)&deltaTime, sizeof(float));
-	checkCudaError("Malloc deltaTime");
-	deltaTime[0] = 0.016;
+	int* deviceNumBodies_1;
+	cudaMallocHost((void**)&deviceNumBodies_1, sizeof(int));
+	checkCudaError("Malloc deviceNumBodies_1");
+	deviceNumBodies_1[0] = 69632;
 
-	buffer dDeltaTime_buffer = cudaDevice.create_buffer(sizeof(float)).get();
-	data_futures.push_back(dDeltaTime_buffer.enqueue_write(0, sizeof(float), deltaTime));
-
-
-	float* damping;
-	cudaMallocHost((void**)&damping, sizeof(float));
-	checkCudaError("Malloc damping");
-	damping[0] = 256;
-
-	buffer dDamping_buffer = cudaDevice.create_buffer(sizeof(float)).get();
-	data_futures.push_back(dDamping_buffer.enqueue_write(0, sizeof(float), damping));
+	buffer dNumBodies_buffer_1 = cudaDevice_1.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dNumBodies_buffer_1.enqueue_write(0, sizeof(int), deviceNumBodies_1));
 
 
-	int* numTiles;
-	cudaMallocHost((void**)&numTiles, sizeof(int));
-	checkCudaError("Malloc numTiles");
-	numTiles[0] = 272;
+	float* deltaTime_1;
+	cudaMallocHost((void**)&deltaTime_1, sizeof(float));
+	checkCudaError("Malloc deltaTime_1");
+	deltaTime_1[0] = 0.016;
 
-	buffer dNumTiles_buffer = cudaDevice.create_buffer(sizeof(int)).get();
-	data_futures.push_back(dNumTiles_buffer.enqueue_write(0, sizeof(int), numTiles));
-*/
-	
-	program prog_1 = cudaDevice_1.create_program_with_file("multi_my_nvidia_nbody_kernel_1.cu").get();
-	program prog_2 = cudaDevice_2.create_program_with_file("multi_my_nvidia_nbody_kernel_2.cu").get();
+	buffer dDeltaTime_buffer_1 = cudaDevice_1.create_buffer(sizeof(float)).get();
+	data_futures.push_back(dDeltaTime_buffer_1.enqueue_write(0, sizeof(float), deltaTime_1));
+
+
+	float* damping_1;
+	cudaMallocHost((void**)&damping_1, sizeof(float));
+	checkCudaError("Malloc damping_1");
+	damping_1[0] = 1;
+
+	buffer dDamping_buffer_1 = cudaDevice_1.create_buffer(sizeof(float)).get();
+	data_futures.push_back(dDamping_buffer_1.enqueue_write(0, sizeof(float), damping_1));
+
+
+	int* numTiles_1;
+	cudaMallocHost((void**)&numTiles_1, sizeof(int));
+	checkCudaError("Malloc numTiles_1");
+	numTiles_1[0] = 392;
+
+	buffer dNumTiles_buffer_1 = cudaDevice_1.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dNumTiles_buffer_1.enqueue_write(0, sizeof(int), numTiles_1));
+
+
+
+	int* deviceOffset_2;
+	cudaMallocHost((void**)&deviceOffset_2, sizeof(int));
+	checkCudaError("Malloc deviceOffset_2");
+	deviceOffset_2[0] = 69632;
+
+	buffer dOffset_buffer_2 = cudaDevice_2.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dOffset_buffer_2.enqueue_write(0, sizeof(int), deviceOffset_2));
+
+
+	int* deviceNumBodies_2;
+	cudaMallocHost((void**)&deviceNumBodies_2, sizeof(int));
+	checkCudaError("Malloc deviceNumBodies_2");
+	deviceNumBodies_2[0] = 30720;
+
+	buffer dNumBodies_buffer_2 = cudaDevice_2.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dNumBodies_buffer_2.enqueue_write(0, sizeof(int), deviceNumBodies_2));
+
+
+	float* deltaTime_2;
+	cudaMallocHost((void**)&deltaTime_2, sizeof(float));
+	checkCudaError("Malloc deltaTime_2");
+	deltaTime_2[0] = 0.016;
+
+	buffer dDeltaTime_buffer_2 = cudaDevice_2.create_buffer(sizeof(float)).get();
+	data_futures.push_back(dDeltaTime_buffer_2.enqueue_write(0, sizeof(float), deltaTime_2));
+
+
+	float* damping_2;
+	cudaMallocHost((void**)&damping_2, sizeof(float));
+	checkCudaError("Malloc damping_2");
+	damping_2[0] = 1;
+
+	buffer dDamping_buffer_2 = cudaDevice_2.create_buffer(sizeof(float)).get();
+	data_futures.push_back(dDamping_buffer_2.enqueue_write(0, sizeof(float), damping_2));
+
+
+	int* numTiles_2;
+	cudaMallocHost((void**)&numTiles_2, sizeof(int));
+	checkCudaError("Malloc numTiles_2");
+	numTiles_2[0] = 392;
+
+	buffer dNumTiles_buffer_2 = cudaDevice_2.create_buffer(sizeof(int)).get();
+	data_futures.push_back(dNumTiles_buffer_2.enqueue_write(0, sizeof(int), numTiles_2));
+
+
+
+	program prog_1 = cudaDevice_1.create_program_with_file("my_nvidia_nbody_kernel.cu").get();
+	program prog_2 = cudaDevice_2.create_program_with_file("my_nvidia_nbody_kernel.cu").get();
 
 	std::vector<std::string> flags_1;
 	std::string mode_1 = "--gpu-architecture=compute_";
@@ -222,20 +212,39 @@ int main (int argc, char* argv[]) {
 	block_2.z = 1;
 
 
-
 	std::vector<hpx::cuda::buffer> args_1;
 	args_1.push_back(dPos_new_buffer_1);
 	args_1.push_back(dPos_old_buffer_1);
 	args_1.push_back(dVel_buffer_1);
+	args_1.push_back(dOffset_buffer_1);
+	args_1.push_back(dNumBodies_buffer_1);
+	args_1.push_back(dDeltaTime_buffer_1);
+	args_1.push_back(dDamping_buffer_1);
+	args_1.push_back(dNumTiles_buffer_1);
 
 
 	std::vector<hpx::cuda::buffer> args_2;
 	args_2.push_back(dPos_new_buffer_2);
 	args_2.push_back(dPos_old_buffer_2);
 	args_2.push_back(dVel_buffer_2);
+	args_2.push_back(dOffset_buffer_2);
+	args_2.push_back(dNumBodies_buffer_2);
+	args_2.push_back(dDeltaTime_buffer_2);
+	args_2.push_back(dDamping_buffer_2);
+	args_2.push_back(dNumTiles_buffer_2);
 
 
 	hpx::wait_all(data_futures);
+
+
+	float* h_velTemp;
+    cudaMallocHost((void**) &h_velTemp, sizeof(float)*100352*4);
+
+
+    float* h_posTemp;
+    cudaMallocHost((void**) &h_posTemp, sizeof(float)*100352*4);
+
+    int currentRead = 0;
 
 	std::cout << "Before kernel launch" << std::endl;
 	for (int step=0; step<10; step++) {
@@ -245,241 +254,111 @@ int main (int argc, char* argv[]) {
 		kernel_future_1.get();
 		kernel_future_2.get();
 
-		// Vou buscar a cada GPU os dados que quero de cada array
-		// Neste caso:
-		// GPU0, quero os dados do 0->69632 body (69632)
-		// GPU1, quero os dados do 69632->100352 body (30720)
-
-		float* temp_posRes_1;
-		cudaMallocHost((void**)&temp_posRes_1, sizeof(float) * 69632 * 4);
-		temp_posRes_1 = dPos_new_buffer_1.enqueue_read_parcel_sync<float>(0, sizeof(float) * 69632 * 4);
-
-		float* temp_velRes_1;
-		cudaMallocHost((void**)&temp_velRes_1, sizeof(float) * 69632 * 4);
-		temp_velRes_1 = dVel_buffer_1.enqueue_read_parcel_sync<float>(0, sizeof(float) * 69632 * 4);
-
-		/*for(int i = 0; i < 1; i++){
-			std::cout << "0tempVelX[" << i << "]: " << temp_velRes_1[i*4+0] << std::endl;
-			std::cout << "0tempVelY[" << i << "]: " << temp_velRes_1[i*4+1] << std::endl;
-			std::cout << "0tempVelZ[" << i << "]: " << temp_velRes_1[i*4+2] << std::endl;
-			std::cout << "0tempVelW[" << i << "]: " << temp_velRes_1[i*4+3] << std::endl;
-			std::cout << std::endl;
-
-			std::cout << "0tempPosX[" << i << "]: " << temp_posRes_1[i*4+0] << std::endl;
-			std::cout << "0tempPosY[" << i << "]: " << temp_posRes_1[i*4+1] << std::endl;
-			std::cout << "0tempPosZ[" << i << "]: " << temp_posRes_1[i*4+2] << std::endl;
-			std::cout << "0tempPosW[" << i << "]: " << temp_posRes_1[i*4+3] << std::endl;
-			std::cout << std::endl;
+		std::iter_swap(args_1.begin(), args_1.begin()+1);
+		std::iter_swap(args_2.begin(), args_2.begin()+1);
 
 
-		}*/
-		
+/*		// Usado para verificar os valores dos resultados a cada iteração
+		if(currentRead == 0){
+            h_velTemp = dVel_buffer_2.enqueue_read_parcel_sync<float>(0, sizeof(float) * 100352 * 4);
+        	h_posTemp = dPos_new_buffer_2.enqueue_read_parcel_sync<float>(0, sizeof(float) * 100352 * 4);
+
+            currentRead = 1;
+        }
+        else if(currentRead == 1){
+            h_velTemp = dVel_buffer_2.enqueue_read_parcel_sync<float>(0, sizeof(float) * 100352 * 4);
+        	h_posTemp = dPos_old_buffer_2.enqueue_read_parcel_sync<float>(0, sizeof(float) * 100352 * 4);
+
+            currentRead = 0;
+        }
 
 
-		float* temp_posRes_2;
-		cudaMallocHost((void**)&temp_posRes_2, sizeof(float) * 30720 * 4);
-		temp_posRes_2 = dPos_new_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
-
-		float* temp_velRes_2;
-		cudaMallocHost((void**)&temp_velRes_2, sizeof(float) * 30720 * 4);
-		temp_velRes_2 = dVel_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
-
-		/*for(int i = 0; i < 1; i++){
-			std::cout << "1tempVelX[" << i << "]: " << temp_velRes_2[i*4+0] << std::endl;
-			std::cout << "1tempVelY[" << i << "]: " << temp_velRes_2[i*4+1] << std::endl;
-			std::cout << "1tempVelZ[" << i << "]: " << temp_velRes_2[i*4+2] << std::endl;
-			std::cout << "1tempVelW[" << i << "]: " << temp_velRes_2[i*4+3] << std::endl;
-			std::cout << std::endl;
-
-			std::cout << "1tempPosX[" << i << "]: " << temp_posRes_2[i*4+0] << std::endl;
-			std::cout << "1tempPosY[" << i << "]: " << temp_posRes_2[i*4+1] << std::endl;
-			std::cout << "1tempPosZ[" << i << "]: " << temp_posRes_2[i*4+2] << std::endl;
-			std::cout << "1tempPosW[" << i << "]: " << temp_posRes_2[i*4+3] << std::endl;
-			std::cout << std::endl;
 
 
-		}*/
 
-		// Juntar os dados todos num array só
-		for(int i = 0; i < 69632; i++){
-			hPos_new[i*4+0] = temp_posRes_1[i*4+0];
-			hPos_new[i*4+1] = temp_posRes_1[i*4+1];
-			hPos_new[i*4+2] = temp_posRes_1[i*4+2];
-			hPos_new[i*4+3] = temp_posRes_1[i*4+3];
+        std::cout << "-------------------- Iteracao: " << step << " --------------------" << std::endl;
 
-			hVel[i*4+0] = temp_velRes_1[i*4+0];
-			hVel[i*4+1] = temp_velRes_1[i*4+1];
-			hVel[i*4+2] = temp_velRes_1[i*4+2];
-			hVel[i*4+3] = temp_velRes_1[i*4+3];
-		}
+        std::cout << std::endl << "velDepoisX[" << 69632 << "]: " << h_velTemp[4*69632+0];
+        std::cout << std::endl << "velDepoisY[" << 69632 << "]: " << h_velTemp[4*69632+1];
+        std::cout << std::endl << "velDepoisZ[" << 69632 << "]: " << h_velTemp[4*69632+2];
+        std::cout << std::endl << "velDepoisW[" << 69632 << "]: " << h_velTemp[4*69632+3];
+        std::cout << std::endl;
 
-		// Juntar os dados todos num array só (ter em consideração o offset para não escrever por cima dos valores do GPU0)
-		int offset = 69632;
-		for(int i = 0; i < 30720; i++){
-			hPos_new[offset*4 + i*4 + 0] = temp_posRes_2[i*4+0];
-			hPos_new[offset*4 + i*4 + 1] = temp_posRes_2[i*4+1];
-			hPos_new[offset*4 + i*4 + 2] = temp_posRes_2[i*4+2];
-			hPos_new[offset*4 + i*4 + 3] = temp_posRes_2[i*4+3];
-
-			hVel[offset*4 + i*4 + 0] = temp_velRes_2[i*4+0];
-			hVel[offset*4 + i*4 + 1] = temp_velRes_2[i*4+1];
-			hVel[offset*4 + i*4 + 2] = temp_velRes_2[i*4+2];
-			hVel[offset*4 + i*4 + 3] = temp_velRes_2[i*4+3];
-		}
-
-		// Copiar os dados todos de volta (ineficiente mas funções atuais do HPXCL complicam muito a cópia)
-		data_futures.push_back(dPos_old_buffer_1.enqueue_write(0, sizeof(float) * 4 * 100352, hPos_new));
-		data_futures.push_back(dVel_buffer_1.enqueue_write(0, sizeof(float) * 4 * 100352, hVel));
-
-		data_futures.push_back(dPos_old_buffer_2.enqueue_write(0, sizeof(float) * 4 * 100352, hPos_new));
-		data_futures.push_back(dVel_buffer_2.enqueue_write(0, sizeof(float) * 4 * 100352, hVel));
-
+        std::cout << std::endl << "posDepoisX[" << 69632 << "]: " << h_posTemp[4*69632+0];
+        std::cout << std::endl << "posDepoisY[" << 69632 << "]: " << h_posTemp[4*69632+1];
+        std::cout << std::endl << "posDepoisZ[" << 69632 << "]: " << h_posTemp[4*69632+2];
+        std::cout << std::endl << "posDepoisW[" << 69632 << "]: " << h_posTemp[4*69632+3];
+        std::cout << std::endl;
+        
+        std::cout << "--------------------------------------------------" <<std::endl;*/
 
 		hpx::wait_all(data_futures);
 
-
-/*
-		std::cout << "---------- Iteracao " << step << " ----------" << std::endl;
-		std::cout << "velDepoisX[" << 0 << "]: " << hVel[0] << std::endl;
-		std::cout << "velDepoisY[" << 0 << "]: " << hVel[1] << std::endl;
-		std::cout << "velDepoisZ[" << 0 << "]: " << hVel[2] << std::endl;
-		std::cout << "velDepoisW[" << 0 << "]: " << hVel[3] << std::endl;
-		std::cout << std::endl;
-
-		std::cout << "posDepoisX[" << 0 << "]: " << hPos_new[0] << std::endl;
-		std::cout << "posDepoisY[" << 0 << "]: " << hPos_new[1] << std::endl;
-		std::cout << "posDepoisZ[" << 0 << "]: " << hPos_new[2] << std::endl;
-		std::cout << "posDepoisW[" << 0 << "]: " << hPos_new[3] << std::endl;
-		std::cout << std::endl;
-
-*/
-
-
-
-
-
-
-
-/*
-
-		hPos_new = dPos_new_buffer_1.enqueue_read_parcel_sync<float>(0, sizeof(float) * 69632 * 4);
-		hVel = dVel_buffer_1.enqueue_read_parcel_sync<float>(0, sizeof(float) * 69632 * 4);
-
-		data_futures.push_back(dPos_old_buffer_2.enqueue_write(0, sizeof(float) * 4 * 69632, hPos_new));
-		data_futures.push_back(dVel_buffer_2.enqueue_write(0, sizeof(float) * 4 * 69632, hVel));
-
-
-		hPos_new = dPos_new_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
-		hVel = dVel_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
-
-		data_futures.push_back(dPos_old_buffer_1.enqueue_write(0, sizeof(float) * 4 * 30720, hPos_new)); //sizeof(float) * 69632 * 4
-		data_futures.push_back(dVel_buffer_1.enqueue_write(0, sizeof(float) * 4 * 30720, hVel)); 
-		// escreve a partir do hVel(ultimo arg) com offset de 0 (primeiro arg) e escreve um totalde sizeof(float)*4*30720 (segundo arg)
-
-
-
-
-
-		float* temp_posRes_1;
-		cudaMallocHost((void**)&temp_posRes_1, sizeof(float) * 69632 * 4);
-		temp_posRes_1 = dPos_new_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
-
-		float* temp_velRes_1;
-		cudaMallocHost((void**)&temp_velRes_1, sizeof(float) * 69632 * 4);
-		temp_posRes_1 = dVel_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
-
-		data_futures.push_back(dPos_old_buffer_2.enqueue_write(0, sizeof(float) * 4 * 69632, temp_posRes_1));
-		data_futures.push_back(dVel_buffer_2.enqueue_write(0, sizeof(float) * 4 * 69632, temp_velRes_1));
-
-
-		float* temp_posRes_2;
-		cudaMallocHost((void**)&temp_posRes_2, sizeof(float) * 30720 * 4);
-		temp_posRes_2 = dPos_new_buffer_2.enqueue_read_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 100352 * 4);
-
-		float* temp_velRes_2;
-		cudaMallocHost((void**)&temp_velRes_2, sizeof(float) * 30720 * 4);
-		temp_posRes_2 = dVel_buffer_2.enqueue_read_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 100352 * 4);
-
-		data_futures.push_back(dPos_old_buffer_1.enqueue_write(sizeof(float) * 69632 * 4, sizeof(float) * 4 * 100352, temp_posRes_2));
-		data_futures.push_back(dVel_buffer_1.enqueue_write(sizeof(float) * 69632 * 4, sizeof(float) * 4 * 100352, temp_velRes_2));
-*/
 	}
 	std::cout << "After kernel launch" << std::endl;
 
-/*
+
 	float* posRes_1;
 	cudaMallocHost((void**)&posRes_1, sizeof(float) * 69632 * 4);
-	posRes_1 = dPos_new_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
 	float* velRes_1;
 	cudaMallocHost((void**)&velRes_1, sizeof(float) * 69632 * 4);
-	velRes_1 = dVel_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
 
-
-
-
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
-	//VERIFICAR SE ESTA LEITURA ESTÁ BEM FEITA
 	float* posRes_2;
 	cudaMallocHost((void**)&posRes_2, sizeof(float) * 30720 * 4);
-	posRes_2 = dPos_new_buffer_2.enqueue_read_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 100352 * 4);
 
 	float* velRes_2;
 	cudaMallocHost((void**)&velRes_2, sizeof(float) * 30720 * 4);
-	velRes_2 = dVel_buffer_2.enqueue_read_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 100352 * 4);
 
 
-	float* final_pos;
-	cudaMallocHost((void**)&final_pos, sizeof(float) * 100352 * 4);
+	if(currentRead == 0){
+		posRes_1 = dPos_old_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+		velRes_1 = dVel_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
-	float* final_vel;
-	cudaMallocHost((void**)&final_vel, sizeof(float) * 100352 * 4);
-
-	for(int i = 0; i < 69632; i++){
-		final_pos[i+0] = posRes_1[i+0];
-		final_pos[i+1] = posRes_1[i+1];
-		final_pos[i+2] = posRes_1[i+2];
-		final_pos[i+3] = posRes_1[i+3];
-
-		final_vel[i+0] = velRes_1[i+0];
-		final_vel[i+1] = velRes_1[i+1];
-		final_vel[i+2] = velRes_1[i+2];
-		final_vel[i+3] = velRes_1[i+3];
+		posRes_2 = dPos_old_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
+		velRes_2 = dVel_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
 	}
+	else if(currentRead == 1){
+		posRes_1 = dPos_new_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+		velRes_1 = dVel_buffer_1.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
-	for(int i = 69632; i < 100352; i++){
-		final_pos[i+0] = posRes_2[i+0];
-		final_pos[i+1] = posRes_2[i+1];
-		final_pos[i+2] = posRes_2[i+2];
-		final_pos[i+3] = posRes_2[i+3];
-
-		final_vel[i+0] = velRes_2[i+0];
-		final_vel[i+1] = velRes_2[i+1];
-		final_vel[i+2] = velRes_2[i+2];
-		final_vel[i+3] = velRes_2[i+3];
+		posRes_2 = dPos_new_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
+		velRes_2 = dVel_buffer_2.enqueue_read_parcel_sync<float>(sizeof(float) * 69632 * 4, sizeof(float) * 30720 * 4);
 	}
-*/
+	
 
 	/*for(int i = 0; i < 100352; i++){
-		std::cout << "finalPosX[" << i << "]: " << hPos_new[i*4] << std::endl;
-		std::cout << "finalPosY[" << i << "]: " << hPos_new[i*4+1] << std::endl;
-		std::cout << "finalPosZ[" << i << "]: " << hPos_new[i*4+2] << std::endl;
-		std::cout << "finalPosW[" << i << "]: " << hPos_new[i*4+3] << std::endl;
+		std::cout << "--------------- Device 0 ---------------" << std::endl;
+		std::cout << "velX[" << i << "]: " << velRes_1[i*4+0] << std::endl;
+		std::cout << "velY[" << i << "]: " << velRes_1[i*4+1] << std::endl;
+		std::cout << "velZ[" << i << "]: " << velRes_1[i*4+2] << std::endl;
+		std::cout << "velW[" << i << "]: " << velRes_1[i*4+3] << std::endl;
 		std::cout << std::endl;
 
-		std::cout << "finalVelX[" << i << "]: " << hVel[i*4] << std::endl;
-		std::cout << "finalVelY[" << i << "]: " << hVel[i*4+1] << std::endl;
-		std::cout << "finalVelZ[" << i << "]: " << hVel[i*4+2] << std::endl;
-		std::cout << "finalVelW[" << i << "]: " << hVel[i*4+3] << std::endl;
+		std::cout << "posX[" << i << "]: " << posRes_1[i*4+0] << std::endl;
+		std::cout << "posY[" << i << "]: " << posRes_1[i*4+1] << std::endl;
+		std::cout << "posZ[" << i << "]: " << posRes_1[i*4+2] << std::endl;
+		std::cout << "posW[" << i << "]: " << posRes_1[i*4+3] << std::endl;
 		std::cout << std::endl;
+		std::cout << std::endl;
+
+		std::cout << "--------------- Device 1 ---------------" << std::endl;
+		std::cout << "velX[" << i << "]: " << velRes_2[69632*4 + i*4+0] << std::endl;
+		std::cout << "velY[" << i << "]: " << velRes_2[69632*4 + i*4+1] << std::endl;
+		std::cout << "velZ[" << i << "]: " << velRes_2[69632*4 + i*4+2] << std::endl;
+		std::cout << "velW[" << i << "]: " << velRes_2[69632*4 + i*4+3] << std::endl;
+		std::cout << std::endl;
+
+		std::cout << "posX[" << i << "]: " << posRes_2[69632*4 + i*4+0] << std::endl;
+		std::cout << "posY[" << i << "]: " << posRes_2[69632*4 + i*4+1] << std::endl;
+		std::cout << "posZ[" << i << "]: " << posRes_2[69632*4 + i*4+2] << std::endl;
+		std::cout << "posW[" << i << "]: " << posRes_2[69632*4 + i*4+3] << std::endl;
+		std::cout << std::endl;
+		std::cout << std::endl;
+
 	}*/
+
 
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;

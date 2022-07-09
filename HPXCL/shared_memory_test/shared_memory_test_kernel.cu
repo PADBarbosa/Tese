@@ -2,7 +2,7 @@ extern "C" {
 	__global__ void dynamicReverse(int* d, int* sizebuffer){
 		int n = sizebuffer[0];
 
-		extern __shared__ int s[];
+		extern __shared__ int s[64];
 
 		int t = threadIdx.x;
 		int tr = n-t-1;

@@ -43,7 +43,6 @@ int main(int argc, char* argv[]) {
 
 	program prog = cudaDevice.create_program_with_file("example_kernel.cu").get();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
@@ -53,7 +52,19 @@ int main(int argc, char* argv[]) {
 
 	// Compile the program
 	prog.build_sync(flags, "dynamicReverse");
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	int* output;
+	cudaMallocHost((void**)&output, sizeof(int) * SIZE);
+	checkCudaError("Malloc result");
+
+
+	buffer outbuffer = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
+	data_futures_1.push_back(outbuffer.enqueue_write(0, sizeof(int) * SIZE, output));
+
+
+
+
 
 	// Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -83,6 +94,7 @@ int main(int argc, char* argv[]) {
 	// Set the parameter for the kernel, have to be the same order as in the definition
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(inbuffer);
+	args.push_back(outbuffer);
 	args.push_back(sizebuffer);
 
 	hpx::wait_all(data_futures);

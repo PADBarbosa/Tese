@@ -66,14 +66,14 @@ extern "C" {
 
 
 
-	__global__ void	integrateBodies(float* newPos, float* oldPos, float* vel){
+	__global__ void	integrateBodies(float* newPos, float* oldPos, float* vel, int* deviceOffsetBuffer, int* deviceNumBodiesBuffer, float* deltaTimeBuffer, float* dampingBuffer, int* numTilesBuffer){
 		int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-		int deviceOffset = 0;
-		int deviceNumBodies = 69632;
-		float deltaTime = 0.016;
-		float damping = 1;
-		int numTiles = 272;
+		int deviceOffset = deviceOffsetBuffer[0];
+		int deviceNumBodies = deviceNumBodiesBuffer[0];
+		float deltaTime = deltaTimeBuffer[0];
+		float damping = dampingBuffer[0];
+		int numTiles = numTilesBuffer[0];
 
 		if (index*4 >= deviceNumBodies*4)
 		{
@@ -81,10 +81,10 @@ extern "C" {
 		}
 
 		float bodyPos[4];
-		bodyPos[0] = oldPos[index*4];
-		bodyPos[1] = oldPos[index*4 + 1];
-		bodyPos[2] = oldPos[index*4 + 2];
-		bodyPos[3] = oldPos[index*4 + 3];
+		bodyPos[0] = oldPos[(deviceOffset + index) * 4 + 0];
+		bodyPos[1] = oldPos[(deviceOffset + index) * 4 + 1];
+		bodyPos[2] = oldPos[(deviceOffset + index) * 4 + 2];
+		bodyPos[3] = oldPos[(deviceOffset + index) * 4 + 3];
 		
 		float accel[3];
 		accel[0] = 1;
@@ -94,10 +94,10 @@ extern "C" {
 		computeBodyAccel(accel, bodyPos, oldPos, numTiles);
 		
 		float velocity[4];
-		velocity[0] = vel[deviceOffset + index*4];
-		velocity[1] = vel[deviceOffset + index*4 + 1];
-		velocity[2] = vel[deviceOffset + index*4 + 2];
-		velocity[3] = vel[deviceOffset + index*4 + 3];
+		velocity[0] = vel[(deviceOffset + index) * 4 + 0];
+		velocity[1] = vel[(deviceOffset + index) * 4 + 1];
+		velocity[2] = vel[(deviceOffset + index) * 4 + 2];
+		velocity[3] = vel[(deviceOffset + index) * 4 + 3];
 		
 		velocity[0] += accel[0] * deltaTime;
 		velocity[1] += accel[1] * deltaTime;
@@ -108,21 +108,21 @@ extern "C" {
 		velocity[2] *= damping;
 
 		float position[3];
-		position[0] = oldPos[deviceOffset + index*4];
-		position[1] = oldPos[deviceOffset + index*4 + 1];
-		position[2] = oldPos[deviceOffset + index*4 + 2];
+		position[0] = oldPos[(deviceOffset + index) * 4 + 0];
+		position[1] = oldPos[(deviceOffset + index) * 4 + 1];
+		position[2] = oldPos[(deviceOffset + index) * 4 + 2];
 		
 		position[0] += velocity[0] * deltaTime;
 		position[1] += velocity[1] * deltaTime;
 		position[2] += velocity[2] * deltaTime;
 
-		newPos[deviceOffset + index*4] = position[0];
-		newPos[deviceOffset + index*4 + 1] = position[1];
-		newPos[deviceOffset + index*4 + 2] = position[2];
+		newPos[(deviceOffset + index) * 4 + 0] = position[0];
+		newPos[(deviceOffset + index) * 4 + 1] = position[1];
+		newPos[(deviceOffset + index) * 4 + 2] = position[2];
 
-		vel[deviceOffset + index*4] = velocity[0];
-		vel[deviceOffset + index*4 + 1] = velocity[1];
-		vel[deviceOffset + index*4 + 2] = velocity[2];
+		vel[(deviceOffset + index) * 4 + 0] = velocity[0];
+		vel[(deviceOffset + index) * 4 + 1] = velocity[1];
+		vel[(deviceOffset + index) * 4 + 2] = velocity[2];
 
 	}
 

@@ -268,14 +268,14 @@ int main()
 	std::cout << a << " * " << hX[i] << " + " << hY[i]
 			  << " = " << hOut[i] << '\n';
   }*/
+  
   // Release resources.
-  /*CUDA_SAFE_CALL(cuMemFree(dX));
-  CUDA_SAFE_CALL(cuMemFree(dY));
-  CUDA_SAFE_CALL(cuMemFree(dOut));
+  CUDA_SAFE_CALL(cuMemFree(d_input));
+  CUDA_SAFE_CALL(cuMemFree(d_output));
   CUDA_SAFE_CALL(cuModuleUnload(module));
   CUDA_SAFE_CALL(cuCtxDestroy(context));
-  delete[] hX;
-  delete[] hY;
-  delete[] hOut;*/
+  delete[] h_input;
+  delete[] h_output;
+  
   return 0;
 }

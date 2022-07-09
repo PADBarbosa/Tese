@@ -36,10 +36,23 @@ int main (int argc, char* argv[]) {
 	cudaMallocHost((void**)&hVel, sizeof(float) * 4 * 69632);
 	checkCudaError("Malloc hVel");
 
-	for(int i = 0; i < 4 * 69632; i++){
-		hPos_new[i] = i;
-		hPos_old[i] = i;
-		hVel[i] = i;
+
+
+	for(int i = 0; i < 69632; i++){
+		hPos_new[i*4+0] = 1*(i+1);
+		hPos_new[i*4+1] = 2*(i+1);
+		hPos_new[i*4+2] = 3*(i+1);
+		hPos_new[i*4+3] = 4*(i+1);
+
+		hPos_old[i*4+0] = 1*(i+1);
+		hPos_old[i*4+1] = 2*(i+1);
+		hPos_old[i*4+2] = 3*(i+1);
+		hPos_old[i*4+3] = 4*(i+1);
+
+	    hVel[i*4+0] = 1*(i+1);
+	    hVel[i*4+1] = 2*(i+1);
+	    hVel[i*4+2] = 3*(i+1);
+	    hVel[i*4+3] = 4*(i+1);
 	}
 
 	buffer dPos_new_buffer = cudaDevice.create_buffer(sizeof(float) * 4 * 69632).get();
@@ -51,7 +64,7 @@ int main (int argc, char* argv[]) {
 	buffer dVel_buffer = cudaDevice.create_buffer(sizeof(float) * 4 * 69632).get();
 	data_futures.push_back(dVel_buffer.enqueue_write(0, sizeof(float) * 4 * 69632, hVel));
 
-/*
+
 	int* deviceOffset;
 	cudaMallocHost((void**)&deviceOffset, sizeof(int));
 	checkCudaError("Malloc deviceOffset");
@@ -82,7 +95,7 @@ int main (int argc, char* argv[]) {
 	float* damping;
 	cudaMallocHost((void**)&damping, sizeof(float));
 	checkCudaError("Malloc damping");
-	damping[0] = 256;
+	damping[0] = 1;
 
 	buffer dDamping_buffer = cudaDevice.create_buffer(sizeof(float)).get();
 	data_futures.push_back(dDamping_buffer.enqueue_write(0, sizeof(float), damping));
@@ -95,7 +108,7 @@ int main (int argc, char* argv[]) {
 
 	buffer dNumTiles_buffer = cudaDevice.create_buffer(sizeof(int)).get();
 	data_futures.push_back(dNumTiles_buffer.enqueue_write(0, sizeof(int), numTiles));
-*/
+
 	
 	program prog = cudaDevice.create_program_with_file("my_nvidia_nbody_kernel.cu").get();
 
@@ -124,47 +137,94 @@ int main (int argc, char* argv[]) {
 	args.push_back(dPos_new_buffer);
 	args.push_back(dPos_old_buffer);
 	args.push_back(dVel_buffer);
-	/*args.push_back(dOffset_buffer);
+	args.push_back(dOffset_buffer);
 	args.push_back(dNumBodies_buffer);
 	args.push_back(dDeltaTime_buffer);
 	args.push_back(dDamping_buffer);
-	args.push_back(dNumTiles_buffer);*/
+	args.push_back(dNumTiles_buffer);
 
 	
+	float* h_tempPos;
+	cudaMallocHost((void**)&h_tempPos, sizeof(float) * 4 * 69632);
+
+	float* h_tempVel;
+	cudaMallocHost((void**)&h_tempVel, sizeof(float) * 4 * 69632);
+
+	int currentRead = 0;
 
 
 	hpx::wait_all(data_futures);
 
 	std::cout << "Before kernel launch" << std::endl;
-	for (int step=0; step<2; step++) {
+	for (int step=0; step<10; step++) {
 		auto kernel_future = prog.run(args, "integrateBodies", grid, block, 1024*sizeof(float));
-		kernel_future.get();		
+		kernel_future.get();
+
+/*		// Usado para verificar os valores dos resultados a cada iteração
+		if(currentRead == 0){
+			h_tempPos = dPos_new_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+			h_tempVel = dVel_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+
+			currentRead = 1;
+		}
+		else if(currentRead == 1){
+			h_tempPos = dPos_old_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+			h_tempVel = dVel_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+
+			currentRead = 0;
+		}
+
+		for(int i = 0; i < 1; i++){
+			std::cout << "velX[" << i << "]: " << h_tempVel[i*4+0] << std::endl;
+			std::cout << "velY[" << i << "]: " << h_tempVel[i*4+1] << std::endl;
+			std::cout << "velZ[" << i << "]: " << h_tempVel[i*4+2] << std::endl;
+			std::cout << "velW[" << i << "]: " << h_tempVel[i*4+3] << std::endl;
+			std::cout << std::endl;
+
+			std::cout << "posX[" << i << "]: " << h_tempPos[i*4+0] << std::endl;
+			std::cout << "posY[" << i << "]: " << h_tempPos[i*4+1] << std::endl;
+			std::cout << "posZ[" << i << "]: " << h_tempPos[i*4+2] << std::endl;
+			std::cout << "posW[" << i << "]: " << h_tempPos[i*4+3] << std::endl;
+			std::cout << std::endl;
+		}*/
+		
+
+
+		std::iter_swap(args.begin(), args.begin()+1);
 	}
 	std::cout << "After kernel launch" << std::endl;
 
 
 	float* posRes;
 	cudaMallocHost((void**)&posRes, sizeof(float) * 69632 * 4);
-	posRes = dPos_new_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
 	float* velRes;
 	cudaMallocHost((void**)&velRes, sizeof(float) * 69632 * 4);
-	velRes = dVel_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 
-	for(int i = 0; i < 69632; i++){
-		std::cout << "velDepoisX[" << i << "]: " << velRes[i*4] << std::endl;
-		std::cout << "velDepoisY[" << i << "]: " << velRes[i*4+1] << std::endl;
-		std::cout << "velDepoisZ[" << i << "]: " << velRes[i*4+2] << std::endl;
-		std::cout << "velDepoisW[" << i << "]: " << velRes[i*4+3] << std::endl;
-		std::cout << std::endl;
-
-		std::cout << "posDepoisX[" << i << "]: " << posRes[i*4] << std::endl;
-		std::cout << "posDepoisY[" << i << "]: " << posRes[i*4+1] << std::endl;
-		std::cout << "posDepoisZ[" << i << "]: " << posRes[i*4+2] << std::endl;
-		std::cout << "posDepoisW[" << i << "]: " << posRes[i*4+3] << std::endl;
-		std::cout << std::endl;
-
+	if(currentRead == 0){
+		posRes = dPos_old_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+		velRes = dVel_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
 	}
+	else if(currentRead == 1){
+		posRes = dPos_new_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+		velRes = dVel_buffer.enqueue_read_sync<float>(0, sizeof(float) * 69632 * 4);
+	}
+	
+
+	/*for(int i = 0; i < 69632; i++){
+		std::cout << "velX[" << i << "]: " << velRes[i*4+0] << std::endl;
+		std::cout << "velY[" << i << "]: " << velRes[i*4+1] << std::endl;
+		std::cout << "velZ[" << i << "]: " << velRes[i*4+2] << std::endl;
+		std::cout << "velW[" << i << "]: " << velRes[i*4+3] << std::endl;
+		std::cout << std::endl;
+
+		std::cout << "posX[" << i << "]: " << posRes[i*4+0] << std::endl;
+		std::cout << "posY[" << i << "]: " << posRes[i*4+1] << std::endl;
+		std::cout << "posZ[" << i << "]: " << posRes[i*4+2] << std::endl;
+		std::cout << "posW[" << i << "]: " << posRes[i*4+3] << std::endl;
+		std::cout << std::endl;
+
+	}*/
 
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
